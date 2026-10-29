@@ -1,0 +1,1452 @@
+```html
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Gestão - Associação de Pescadores</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .badge-regular {
+        background-color: #def7ec;
+        color: #03543f;
+        border: 1px solid #84e1bc;
+      }
+      .badge-vencido {
+        background-color: #fde8e8;
+        color: #9b1c1c;
+        border: 1px solid #f8b4b4;
+      }
+      .badge-pendente {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fcd34d;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+    <!-- Header / Navbar -->
+    <header class="bg-cyan-800 text-white shadow-lg sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logotipo & Nome -->
+          <div
+            class="flex items-center space-x-3 cursor-pointer"
+            onclick="switchTab('search')"
+          >
+            <div class="bg-cyan-600 p-2.5 rounded-lg text-white">
+              <i class="fa-solid fa-fish fa-lg"></i>
+            </div>
+            <div>
+              <h1 class="font-bold text-lg leading-tight">
+                Associação de Pescadores
+              </h1>
+              <p class="text-xs text-cyan-200">
+                Sistema de Controle de Cadastros e Seguro-Defeso
+              </p>
+            </div>
+          </div>
+
+          <!-- Navegação Desktop -->
+          <nav class="hidden md:flex space-x-2">
+            <button
+              id="nav-search"
+              onclick="switchTab('search')"
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-cyan-900 text-white flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Consultar Pescador</span>
+            </button>
+            <button
+              id="nav-register"
+              onclick="switchTab('register')"
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-cyan-700 text-cyan-100 flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Novo Cadastro</span>
+            </button>
+            <button
+              id="nav-report"
+              onclick="switchTab('report')"
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-cyan-700 text-cyan-100 flex items-center space-x-2"
+            >
+              <i class="fa-solid fa-list-check"></i>
+              <span>Relatório Geral</span>
+            </button>
+          </nav>
+
+          <!-- Menu Mobile (Botão) -->
+          <div class="md:hidden">
+            <button
+              onclick="toggleMobileMenu()"
+              class="p-2 rounded-md text-cyan-200 hover:text-white hover:bg-cyan-700 focus:outline-none"
+            >
+              <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Mobile Dropdown -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-cyan-900 px-4 pt-2 pb-4 space-y-2 border-t border-cyan-700"
+      >
+        <button
+          onclick="
+            switchTab('search');
+            toggleMobileMenu();
+          "
+          class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-cyan-800 flex items-center space-x-2"
+        >
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Consultar Pescador</span>
+        </button>
+        <button
+          onclick="
+            switchTab('register');
+            toggleMobileMenu();
+          "
+          class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-cyan-100 hover:bg-cyan-800 flex items-center space-x-2"
+        >
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Novo Cadastro</span>
+        </button>
+        <button
+          onclick="
+            switchTab('report');
+            toggleMobileMenu();
+          "
+          class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-cyan-100 hover:bg-cyan-800 flex items-center space-x-2"
+        >
+          <i class="fa-solid fa-list-check"></i>
+          <span>Relatório Geral</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Notificações Toast -->
+    <div
+      id="toast"
+      class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-sm w-full bg-slate-900 text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none"
+    >
+      <i
+        id="toast-icon"
+        class="fa-solid fa-circle-check text-emerald-400 text-xl"
+      ></i>
+      <div id="toast-message" class="text-sm font-medium">
+        Operação realizada com sucesso!
+      </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      <!-- TAB 1: CONSULTA -->
+      <section id="tab-search" class="space-y-6">
+        <!-- Banner de Busca -->
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8"
+        >
+          <div class="max-w-3xl mx-auto text-center space-y-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800">
+              Consulta de Pescadores Associados
+            </h2>
+            <p class="text-slate-500 text-sm md:text-base">
+              Pesquise por Nome ou CPF para verificar o status da renovação e
+              seguro-defeso.
+            </p>
+
+            <div class="relative mt-4">
+              <div
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"
+              >
+                <i class="fa-solid fa-search text-lg"></i>
+              </div>
+              <input
+                type="text"
+                id="search-input"
+                onkeyup="handleSearch()"
+                placeholder="Digite o CPF ou Nome do pescador..."
+                class="w-full pl-11 pr-12 py-3.5 text-slate-800 placeholder-slate-400 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:bg-white text-base md:text-lg transition-all shadow-inner"
+              />
+              <button
+                id="clear-search-btn"
+                onclick="clearSearch()"
+                class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+              >
+                <i class="fa-solid fa-circle-xmark text-lg"></i>
+              </button>
+            </div>
+
+            <!-- Filtros Rápidos -->
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <span
+                class="text-xs font-semibold text-slate-400 uppercase tracking-wider"
+                >Filtros:</span
+              >
+              <button
+                onclick="setFilter('all')"
+                id="filter-all"
+                class="px-3 py-1 text-xs rounded-full bg-cyan-700 text-white font-medium shadow-sm transition"
+              >
+                Todos
+              </button>
+              <button
+                onclick="setFilter('regular')"
+                id="filter-regular"
+                class="px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium transition"
+              >
+                Renovação Em Dia
+              </button>
+              <button
+                onclick="setFilter('vencido')"
+                id="filter-vencido"
+                class="px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium transition"
+              >
+                Renovação Vencida
+              </button>
+              <button
+                onclick="setFilter('defeso-ok')"
+                id="filter-defeso-ok"
+                class="px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium transition"
+              >
+                Seguro Defeso Ok
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contador de Resultados -->
+        <div class="flex justify-between items-center px-1">
+          <span id="results-count" class="text-sm font-semibold text-slate-500"
+            >Exibindo registros</span
+          >
+          <span class="text-xs text-slate-400"
+            >Ano de Referência Vigente:
+            <strong class="text-slate-700" id="current-year-display"
+              >2026</strong
+            ></span
+          >
+        </div>
+
+        <!-- Lista de Cartões dos Pescadores -->
+        <div
+          id="results-list"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          <!-- Inserido dinamicamente via JS -->
+        </div>
+
+        <!-- Estado Vazio / Nenhum resultado -->
+        <div
+          id="empty-state"
+          class="hidden bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center"
+        >
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4"
+          >
+            <i class="fa-solid fa-user-slash text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-700 mb-1">
+            Nenhum pescador encontrado
+          </h3>
+          <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">
+            Não localizamos nenhum cadastro com os termos informados. Verifique
+            se o CPF ou nome foi digitado corretamente.
+          </p>
+          <button
+            onclick="switchTab('register')"
+            class="inline-flex items-center space-x-2 bg-cyan-700 hover:bg-cyan-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm"
+          >
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Cadastrar Novo Pescador</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 2: NOVO CADASTRO / EDIÇÃO -->
+      <section id="tab-register" class="hidden max-w-4xl mx-auto">
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden"
+        >
+          <div
+            class="bg-cyan-800 px-6 py-5 text-white flex justify-between items-center"
+          >
+            <div>
+              <h2 id="form-title" class="text-xl font-bold">
+                Cadastrar Novo Pescador
+              </h2>
+              <p class="text-xs text-cyan-200 mt-0.5">
+                Preencha os dados abaixo para manter o arquivo da associação
+                atualizado.
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick="cancelEdit()"
+              id="btn-cancel-edit"
+              class="hidden text-xs bg-cyan-900 hover:bg-cyan-950 px-3 py-1.5 rounded-lg border border-cyan-700 transition"
+            >
+              Cancelar Edição
+            </button>
+          </div>
+
+          <form
+            id="fisherman-form"
+            onsubmit="saveFisherman(event)"
+            class="p-6 md:p-8 space-y-6"
+          >
+            <input type="hidden" id="fisherman-id" value="" />
+
+            <!-- Seção 1: Dados Pessoais -->
+            <div class="space-y-4">
+              <h3
+                class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 flex items-center space-x-2"
+              >
+                <i class="fa-solid fa-id-card text-cyan-700"></i>
+                <span>Dados Pessoais e RGP</span>
+              </h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >Nome Completo *</label
+                  >
+                  <input
+                    type="text"
+                    id="input-nome"
+                    required
+                    placeholder="Ex: João Maria da Silva"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-cyan-600 focus:bg-white text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >CPF *</label
+                  >
+                  <input
+                    type="text"
+                    id="input-cpf"
+                    required
+                    placeholder="000.000.000-00"
+                    oninput="formatCPFInput(this)"
+                    maxlength="14"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-cyan-600 focus:bg-white text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >Nº RGP (Registro Geral de Pesca)</label
+                  >
+                  <input
+                    type="text"
+                    id="input-rgp"
+                    placeholder="Ex: RGP-1234567-PA"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-cyan-600 focus:bg-white text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >Telefone / WhatsApp</label
+                  >
+                  <input
+                    type="text"
+                    id="input-telefone"
+                    placeholder="(00) 00000-0000"
+                    oninput="formatPhoneInput(this)"
+                    maxlength="15"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-cyan-600 focus:bg-white text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >Comunidade / Porto de Origem</label
+                  >
+                  <input
+                    type="text"
+                    id="input-comunidade"
+                    placeholder="Ex: Porto das Barcas"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-cyan-600 focus:bg-white text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção 2: Renovação e Seguro-Defeso Vigente -->
+            <div class="space-y-4 pt-2">
+              <h3
+                class="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-2 flex items-center space-x-2"
+              >
+                <i class="fa-solid fa-file-signature text-cyan-700"></i>
+                <span>Situação do Ano Atual (2026)</span>
+              </h3>
+
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200"
+              >
+                <!-- Renovação de Cadastro -->
+                <div class="space-y-3">
+                  <label class="block text-sm font-semibold text-slate-800"
+                    >Renovação de Cadastro</label
+                  >
+
+                  <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1"
+                      >Ano da Última Renovação</label
+                    >
+                    <input
+                      type="number"
+                      id="input-ano-renovacao"
+                      min="2020"
+                      max="2030"
+                      value="2026"
+                      required
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1"
+                      >Data da Renovação</label
+                    >
+                    <input
+                      type="date"
+                      id="input-data-renovacao"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+
+                <!-- Seguro Defeso -->
+                <div class="space-y-3">
+                  <label class="block text-sm font-semibold text-slate-800"
+                    >Seguro-Defeso (Ano Vigente)</label
+                  >
+
+                  <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1"
+                      >Status do Seguro Defeso</label
+                    >
+                    <select
+                      id="input-status-defeso"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm"
+                    >
+                      <option value="Em Dia / Requerido">
+                        Em Dia / Requerido
+                      </option>
+                      <option value="Pendente / Vencido">
+                        Pendente / Não Solicitado
+                      </option>
+                      <option value="Não Elegível">Não Elegível</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1"
+                      >Nº do Protocolo / Requerimento</label
+                    >
+                    <input
+                      type="text"
+                      id="input-protocolo-defeso"
+                      placeholder="Ex: SD-2026-9988"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label
+                    class="block text-xs font-semibold text-slate-700 uppercase mb-1"
+                    >Observações / Anotações Gerais</label
+                  >
+                  <textarea
+                    id="input-observacoes"
+                    rows="2"
+                    placeholder="Observações sobre documentação pendente, procuração, etc."
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões -->
+            <div
+              class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200"
+            >
+              <button
+                type="button"
+                onclick="switchTab('search')"
+                class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-medium text-sm transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-medium text-sm transition shadow-md flex items-center space-x-2"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span id="btn-save-text">Salvar Cadastro</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB 3: RELATÓRIO GERAL E BACKUP -->
+      <section id="tab-report" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
+          >
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">
+                Relatório Geral da Associação
+              </h2>
+              <p class="text-xs text-slate-500">
+                Resumo consolidado dos sócios e controle de cópia de segurança.
+              </p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button
+                onclick="exportData()"
+                class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center space-x-1.5"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span>Exportar Backup (JSON)</span>
+              </button>
+              <label
+                class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5"
+              >
+                <i class="fa-solid fa-upload"></i>
+                <span>Importar Backup</span>
+                <input
+                  type="file"
+                  id="import-file"
+                  accept=".json"
+                  onchange="importData(event)"
+                  class="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- Cards Métricas -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-cyan-50 p-4 rounded-xl border border-cyan-100">
+              <span class="text-xs font-semibold text-cyan-800 uppercase"
+                >Total de Pescadores</span
+              >
+              <div
+                class="text-2xl font-extrabold text-cyan-900 mt-1"
+                id="stat-total"
+              >
+                0
+              </div>
+            </div>
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-800 uppercase"
+                >Cadastros Em Dia</span
+              >
+              <div
+                class="text-2xl font-extrabold text-emerald-900 mt-1"
+                id="stat-regular"
+              >
+                0
+              </div>
+            </div>
+            <div class="bg-rose-50 p-4 rounded-xl border border-rose-100">
+              <span class="text-xs font-semibold text-rose-800 uppercase"
+                >Cadastros Vencidos</span
+              >
+              <div
+                class="text-2xl font-extrabold text-rose-900 mt-1"
+                id="stat-vencido"
+              >
+                0
+              </div>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+              <span class="text-xs font-semibold text-amber-800 uppercase"
+                >Seguro Defeso Requerido</span
+              >
+              <div
+                class="text-2xl font-extrabold text-amber-900 mt-1"
+                id="stat-defeso"
+              >
+                0
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela Listagem Completa -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr
+                  class="bg-slate-100 text-slate-600 font-semibold text-xs uppercase border-b border-slate-200"
+                >
+                  <th class="p-3.5">Nome</th>
+                  <th class="p-3.5">CPF</th>
+                  <th class="p-3.5">RGP</th>
+                  <th class="p-3.5">Última Renovação</th>
+                  <th class="p-3.5">Seguro Defeso (2026)</th>
+                  <th class="p-3.5 text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody
+                id="report-table-body"
+                class="divide-y divide-slate-200 bg-white"
+              >
+                <!-- Inserido dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL: DETALHES E HISTÓRICO DO PESCADOR -->
+    <div
+      id="modal-details"
+      class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-fade-in"
+      >
+        <!-- Header Modal -->
+        <div
+          class="bg-cyan-800 text-white p-5 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 rounded-full bg-cyan-700 flex items-center justify-center text-lg font-bold"
+            >
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div>
+              <h3 id="modal-nome" class="font-bold text-lg leading-tight">
+                Nome do Pescador
+              </h3>
+              <p id="modal-cpf" class="text-xs text-cyan-200">
+                CPF: 000.000.000-00
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="closeModal()"
+            class="text-cyan-200 hover:text-white p-2 rounded-lg hover:bg-cyan-700"
+          >
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Body Modal -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
+          <!-- Info Básica Grid -->
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200"
+          >
+            <div>
+              <span class="block text-xs text-slate-400 font-medium"
+                >Nº RGP</span
+              >
+              <span id="modal-rgp" class="font-semibold text-slate-800">-</span>
+            </div>
+            <div>
+              <span class="block text-xs text-slate-400 font-medium"
+                >Telefone / Whats</span
+              >
+              <span id="modal-telefone" class="font-semibold text-slate-800"
+                >-</span
+              >
+            </div>
+            <div>
+              <span class="block text-xs text-slate-400 font-medium"
+                >Comunidade</span
+              >
+              <span id="modal-comunidade" class="font-semibold text-slate-800"
+                >-</span
+              >
+            </div>
+          </div>
+
+          <!-- Status Atual Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              class="p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between space-y-2"
+            >
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-slate-400"
+                >Status Cadastro</span
+              >
+              <div id="modal-status-renovacao" class="text-sm">
+                <!-- Badge gerado via JS -->
+              </div>
+              <p id="modal-data-renovacao-txt" class="text-xs text-slate-500">
+                Última renovação realizada em: -
+              </p>
+            </div>
+
+            <div
+              class="p-4 rounded-xl border bg-white shadow-sm flex flex-col justify-between space-y-2"
+            >
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-slate-400"
+                >Seguro-Defeso (2026)</span
+              >
+              <div id="modal-status-defeso" class="text-sm">
+                <!-- Badge gerado via JS -->
+              </div>
+              <p id="modal-protocolo-txt" class="text-xs text-slate-500">
+                Protocolo: -
+              </p>
+            </div>
+          </div>
+
+          <!-- Observações -->
+          <div id="modal-obs-box" class="hidden">
+            <h4
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
+            >
+              Observações Internas
+            </h4>
+            <p
+              id="modal-observacoes"
+              class="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg text-xs leading-relaxed"
+            ></p>
+          </div>
+
+          <!-- Registrar Novo Evento Rápido -->
+          <div
+            class="bg-slate-100 p-4 rounded-xl border border-slate-200 space-y-3"
+          >
+            <h4
+              class="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center space-x-1.5"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>Atualizar Situação do Ano Vigente</span>
+            </h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-600 mb-1"
+                  >Renovar para o Ano</label
+                >
+                <div class="flex space-x-2">
+                  <input
+                    type="number"
+                    id="quick-ano"
+                    value="2026"
+                    class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-xs"
+                  />
+                  <button
+                    onclick="quickRenew()"
+                    class="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-semibold hover:bg-emerald-700 transition"
+                  >
+                    Dar Baixa
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-600 mb-1"
+                  >Atualizar Seguro Defeso</label
+                >
+                <div class="flex space-x-2">
+                  <select
+                    id="quick-defeso-status"
+                    class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded text-xs"
+                  >
+                    <option value="Em Dia / Requerido">
+                      Em Dia / Requerido
+                    </option>
+                    <option value="Pendente / Vencido">
+                      Pendente / Vencido
+                    </option>
+                  </select>
+                  <button
+                    onclick="quickDefesoUpdate()"
+                    class="px-3 py-1.5 bg-cyan-700 text-white rounded text-xs font-semibold hover:bg-cyan-800 transition"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Modal -->
+        <div
+          class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center"
+        >
+          <button
+            id="btn-modal-delete"
+            class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center space-x-1"
+          >
+            <i class="fa-solid fa-trash"></i>
+            <span>Excluir Cadastro</span>
+          </button>
+
+          <div class="flex space-x-2">
+            <button
+              id="btn-modal-edit"
+              class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center space-x-1"
+            >
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>Editar Dados</span>
+            </button>
+            <button
+              onclick="closeModal()"
+              class="px-4 py-2 bg-cyan-800 hover:bg-cyan-900 text-white rounded-xl text-xs font-semibold transition"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+      // ANO VIGENTE DO SISTEMA
+      const CURRENT_YEAR = 2026;
+
+      // DADOS FICTÍCIOS INICIAIS
+      const INITIAL_DATA = [
+        {
+          id: "16725311001",
+          nome: "Manoel Raimundo dos Santos",
+          cpf: "123.456.789-00",
+          cpfUnformatted: "12345678900",
+          rgp: "RGP-887123-PA",
+          telefone: "(91) 98877-6655",
+          comunidade: "Vila dos Pescadores - Porto Sul",
+          anoRenovacao: 2026,
+          dataRenovacao: "2026-01-15",
+          statusDefeso: "Em Dia / Requerido",
+          protocoloDefeso: "SD-2026-10492",
+          observacoes:
+            "Documentação completa anexada. Recibo de pesca entregue.",
+        },
+        {
+          id: "16725311002",
+          nome: "Maria das Graças Oliveira",
+          cpf: "987.654.321-11",
+          cpfUnformatted: "98765432111",
+          rgp: "RGP-441092-PA",
+          telefone: "(91) 99122-3344",
+          comunidade: "Comunidade da Barra",
+          anoRenovacao: 2025, // Vencido
+          dataRenovacao: "2025-02-10",
+          statusDefeso: "Pendente / Vencido",
+          protocoloDefeso: "",
+          observacoes:
+            "Pendente de apresentação da certidão do INSS para liberação do Seguro-Defeso 2026.",
+        },
+        {
+          id: "16725311003",
+          nome: "Francisco das Chagas Ferreira",
+          cpf: "456.789.123-22",
+          cpfUnformatted: "45678912322",
+          rgp: "RGP-992381-PA",
+          telefone: "(91) 98455-1122",
+          comunidade: "Ilha de Santana",
+          anoRenovacao: 2026,
+          dataRenovacao: "2026-02-01",
+          statusDefeso: "Em Dia / Requerido",
+          protocoloDefeso: "SD-2026-88201",
+          observacoes: "Sócio remido da associação.",
+        },
+      ];
+
+      // ESTADO GLOBAL DA APLICAÇÃO
+      let fishermen = [];
+      let currentFilter = "all";
+      let selectedFishermanId = null;
+
+      // INICIALIZAÇÃO
+      window.addEventListener("DOMContentLoaded", () => {
+        loadData();
+        renderList();
+        renderReport();
+        document.getElementById("current-year-display").innerText =
+          CURRENT_YEAR;
+      });
+
+      // CARREGAR DADOS DO LOCALSTORAGE
+      function loadData() {
+        const saved = localStorage.getItem("assoc_pescadores_db");
+        if (saved) {
+          try {
+            fishermen = JSON.parse(saved);
+          } catch (e) {
+            fishermen = INITIAL_DATA;
+          }
+        } else {
+          fishermen = INITIAL_DATA;
+          saveToLocalStorage();
+        }
+      }
+
+      // SALVAR NO LOCALSTORAGE
+      function saveToLocalStorage() {
+        localStorage.setItem("assoc_pescadores_db", JSON.stringify(fishermen));
+        renderList();
+        renderReport();
+      }
+
+      // CONTROLE DE NAVEGAÇÃO ENTRE ABAS
+      function switchTab(tabName) {
+        // Oculta todas
+        document.getElementById("tab-search").classList.add("hidden");
+        document.getElementById("tab-register").classList.add("hidden");
+        document.getElementById("tab-report").classList.add("hidden");
+
+        // Reset estilos botões desktop
+        ["search", "register", "report"].forEach((t) => {
+          const btn = document.getElementById(`nav-${t}`);
+          if (btn) {
+            btn.classList.remove("bg-cyan-900", "text-white");
+            btn.classList.add("text-cyan-100", "hover:bg-cyan-700");
+          }
+        });
+
+        // Exibe selecionada
+        document.getElementById(`tab-${tabName}`).classList.remove("hidden");
+        const activeBtn = document.getElementById(`nav-${tabName}`);
+        if (activeBtn) {
+          activeBtn.classList.add("bg-cyan-900", "text-white");
+          activeBtn.classList.remove("text-cyan-100", "hover:bg-cyan-700");
+        }
+
+        if (tabName === "report") {
+          renderReport();
+        }
+      }
+
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        menu.classList.toggle("hidden");
+      }
+
+      // RENDERIZAR LISTA DE CARTOES NA BUSCA
+      function renderList() {
+        const container = document.getElementById("results-list");
+        const emptyState = document.getElementById("empty-state");
+        const query = document
+          .getElementById("search-input")
+          .value.toLowerCase()
+          .trim();
+        const cleanQuery = query.replace(/\D/g, "");
+
+        // Filtragem
+        let filtered = fishermen.filter((item) => {
+          // Filtro texto/CPF
+          const matchName = item.nome.toLowerCase().includes(query);
+          const matchCPF =
+            item.cpfUnformatted.includes(cleanQuery) ||
+            item.cpf.includes(query);
+          const matchRGP = item.rgp.toLowerCase().includes(query);
+          const matchesQuery =
+            query === "" || matchName || matchCPF || matchRGP;
+
+          // Filtro Categoria
+          let matchesCategory = true;
+          const isRegular = parseInt(item.anoRenovacao) >= CURRENT_YEAR;
+          const isDefesoOk = item.statusDefeso === "Em Dia / Requerido";
+
+          if (currentFilter === "regular") matchesCategory = isRegular;
+          if (currentFilter === "vencido") matchesCategory = !isRegular;
+          if (currentFilter === "defeso-ok") matchesCategory = isDefesoOk;
+
+          return matchesQuery && matchesCategory;
+        });
+
+        document.getElementById("results-count").innerText =
+          `Exibindo ${filtered.length} registro(s)`;
+
+        if (filtered.length === 0) {
+          container.innerHTML = "";
+          emptyState.classList.remove("hidden");
+          return;
+        }
+
+        emptyState.classList.add("hidden");
+        container.innerHTML = "";
+
+        filtered.forEach((item) => {
+          const isRenovacaoOk = parseInt(item.anoRenovacao) >= CURRENT_YEAR;
+          const isDefesoOk = item.statusDefeso === "Em Dia / Requerido";
+
+          const card = document.createElement("div");
+          card.className =
+            "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition duration-200 p-5 flex flex-col justify-between space-y-4 cursor-pointer";
+          card.onclick = () => openModal(item.id);
+
+          card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <h3 class="font-bold text-slate-800 text-base leading-snug line-clamp-1">${item.nome}</h3>
+                            <span class="text-xs text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded">${item.rgp || "Sem RGP"}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">CPF: <span class="text-slate-700 font-mono">${item.cpf}</span></p>
+                        <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${item.comunidade || "Não informada"}</p>
+                    </div>
+
+                    <!-- Status Badges -->
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-500">Renovação (${item.anoRenovacao}):</span>
+                            ${
+                              isRenovacaoOk
+                                ? `<span class="badge-regular px-2.5 py-1 rounded-full text-xs font-semibold flex items-center space-x-1"><i class="fa-solid fa-circle-check"></i><span>Em Dia</span></span>`
+                                : `<span class="badge-vencido px-2.5 py-1 rounded-full text-xs font-semibold flex items-center space-x-1"><i class="fa-solid fa-triangle-exclamation"></i><span>Vencida</span></span>`
+                            }
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-500">Seguro Defeso (${CURRENT_YEAR}):</span>
+                            ${
+                              isDefesoOk
+                                ? `<span class="badge-regular px-2.5 py-1 rounded-full text-xs font-semibold flex items-center space-x-1"><i class="fa-solid fa-shield-halved"></i><span>Requerido</span></span>`
+                                : `<span class="badge-pendente px-2.5 py-1 rounded-full text-xs font-semibold flex items-center space-x-1"><i class="fa-solid fa-clock"></i><span>Pendente</span></span>`
+                            }
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end items-center text-xs text-cyan-700 font-semibold group">
+                        <span>Ver Ficha Completa</span>
+                        <i class="fa-solid fa-chevron-right ml-1 text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                `;
+          container.appendChild(card);
+        });
+      }
+
+      // CONTROLAR BUSCA
+      function handleSearch() {
+        const input = document.getElementById("search-input");
+        const clearBtn = document.getElementById("clear-search-btn");
+        if (input.value.length > 0) {
+          clearBtn.classList.remove("hidden");
+        } else {
+          clearBtn.classList.add("hidden");
+        }
+        renderList();
+      }
+
+      function clearSearch() {
+        document.getElementById("search-input").value = "";
+        document.getElementById("clear-search-btn").classList.add("hidden");
+        renderList();
+      }
+
+      function setFilter(filterType) {
+        currentFilter = filterType;
+
+        // Estilo dos botões
+        ["all", "regular", "vencido", "defeso-ok"].forEach((f) => {
+          const btn = document.getElementById(`filter-${f}`);
+          if (f === filterType) {
+            btn.className =
+              "px-3 py-1 text-xs rounded-full bg-cyan-700 text-white font-medium shadow-sm transition";
+          } else {
+            btn.className =
+              "px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium transition";
+          }
+        });
+
+        renderList();
+      }
+
+      // ABRIR MODAL DE DETALHES
+      function openModal(id) {
+        const item = fishermen.find((f) => f.id === id);
+        if (!item) return;
+
+        selectedFishermanId = id;
+
+        document.getElementById("modal-nome").innerText = item.nome;
+        document.getElementById("modal-cpf").innerText = `CPF: ${item.cpf}`;
+        document.getElementById("modal-rgp").innerText =
+          item.rgp || "Não informado";
+        document.getElementById("modal-telefone").innerText =
+          item.telefone || "Não informado";
+        document.getElementById("modal-comunidade").innerText =
+          item.comunidade || "Não informada";
+
+        // Status Renovação
+        const isRenovacaoOk = parseInt(item.anoRenovacao) >= CURRENT_YEAR;
+        const renBadge = document.getElementById("modal-status-renovacao");
+        renBadge.innerHTML = isRenovacaoOk
+          ? `<span class="badge-regular px-3 py-1 rounded-full font-bold inline-block"><i class="fa-solid fa-check mr-1"></i>Cadastro Em Dia (${item.anoRenovacao})</span>`
+          : `<span class="badge-vencido px-3 py-1 rounded-full font-bold inline-block"><i class="fa-solid fa-xmark mr-1"></i>Cadastro Vencido (Ano ${item.anoRenovacao})</span>`;
+
+        document.getElementById("modal-data-renovacao-txt").innerText =
+          item.dataRenovacao
+            ? `Data do último registro: ${formatDateBR(item.dataRenovacao)}`
+            : "Data não informada";
+
+        // Status Seguro Defeso
+        const isDefesoOk = item.statusDefeso === "Em Dia / Requerido";
+        const defBadge = document.getElementById("modal-status-defeso");
+        defBadge.innerHTML = isDefesoOk
+          ? `<span class="badge-regular px-3 py-1 rounded-full font-bold inline-block"><i class="fa-solid fa-shield-halved mr-1"></i>Seguro Solicitado / Regular</span>`
+          : `<span class="badge-pendente px-3 py-1 rounded-full font-bold inline-block"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Seguro Pendente</span>`;
+
+        document.getElementById("modal-protocolo-txt").innerText =
+          item.protocoloDefeso
+            ? `Protocolo: ${item.protocoloDefeso}`
+            : "Nenhum protocolo informado";
+
+        // Observações
+        const obsBox = document.getElementById("modal-obs-box");
+        if (item.observacoes && item.observacoes.trim() !== "") {
+          document.getElementById("modal-observacoes").innerText =
+            item.observacoes;
+          obsBox.classList.remove("hidden");
+        } else {
+          obsBox.classList.add("hidden");
+        }
+
+        // Ações do Modal
+        document.getElementById("btn-modal-edit").onclick = () => {
+          closeModal();
+          editFisherman(item.id);
+        };
+
+        document.getElementById("btn-modal-delete").onclick = () => {
+          if (
+            confirm(
+              `Tem certeza que deseja remover o cadastro de ${item.nome}?`,
+            )
+          ) {
+            deleteFisherman(item.id);
+            closeModal();
+          }
+        };
+
+        document.getElementById("modal-details").classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("modal-details").classList.add("hidden");
+        selectedFishermanId = null;
+      }
+
+      // AÇÕES RÁPIDAS NO MODAL
+      function quickRenew() {
+        if (!selectedFishermanId) return;
+        const ano = document.getElementById("quick-ano").value;
+        const item = fishermen.find((f) => f.id === selectedFishermanId);
+        if (item) {
+          item.anoRenovacao = parseInt(ano);
+          item.dataRenovacao = new Date().toISOString().split("T")[0];
+          saveToLocalStorage();
+          openModal(selectedFishermanId); // Recarrega modal
+          showToast("Renovação atualizada com sucesso!");
+        }
+      }
+
+      function quickDefesoUpdate() {
+        if (!selectedFishermanId) return;
+        const status = document.getElementById("quick-defeso-status").value;
+        const item = fishermen.find((f) => f.id === selectedFishermanId);
+        if (item) {
+          item.statusDefeso = status;
+          saveToLocalStorage();
+          openModal(selectedFishermanId);
+          showToast("Situação do Seguro Defeso atualizada!");
+        }
+      }
+
+      // FORMULÁRIO: SALVAR / EDITAR
+      function saveFisherman(event) {
+        event.preventDefault();
+
+        const id = document.getElementById("fisherman-id").value;
+        const nome = document.getElementById("input-nome").value.trim();
+        const cpf = document.getElementById("input-cpf").value.trim();
+        const cpfUnformatted = cpf.replace(/\D/g, "");
+
+        if (cpfUnformatted.length !== 11) {
+          alert("Por favor, informe um CPF válido com 11 dígitos.");
+          return;
+        }
+
+        const rgp = document.getElementById("input-rgp").value.trim();
+        const telefone = document.getElementById("input-telefone").value.trim();
+        const comunidade = document
+          .getElementById("input-comunidade")
+          .value.trim();
+        const anoRenovacao =
+          parseInt(document.getElementById("input-ano-renovacao").value) ||
+          CURRENT_YEAR;
+        const dataRenovacao =
+          document.getElementById("input-data-renovacao").value ||
+          new Date().toISOString().split("T")[0];
+        const statusDefeso = document.getElementById(
+          "input-status-defeso",
+        ).value;
+        const protocoloDefeso = document
+          .getElementById("input-protocolo-defeso")
+          .value.trim();
+        const observacoes = document
+          .getElementById("input-observacoes")
+          .value.trim();
+
+        if (id) {
+          // Editar existente
+          const index = fishermen.findIndex((f) => f.id === id);
+          if (index !== -1) {
+            fishermen[index] = {
+              ...fishermen[index],
+              nome,
+              cpf,
+              cpfUnformatted,
+              rgp,
+              telefone,
+              comunidade,
+              anoRenovacao,
+              dataRenovacao,
+              statusDefeso,
+              protocoloDefeso,
+              observacoes,
+            };
+            showToast("Cadastro atualizado com sucesso!");
+          }
+        } else {
+          // Novo registro
+          const newFisherman = {
+            id: Date.now().toString(),
+            nome,
+            cpf,
+            cpfUnformatted,
+            rgp,
+            telefone,
+            comunidade,
+            anoRenovacao,
+            dataRenovacao,
+            statusDefeso,
+            protocoloDefeso,
+            observacoes,
+          };
+          fishermen.push(newFisherman);
+          showToast("Novo pescador cadastrado!");
+        }
+
+        saveToLocalStorage();
+        resetForm();
+        switchTab("search");
+      }
+
+      function editFisherman(id) {
+        const item = fishermen.find((f) => f.id === id);
+        if (!item) return;
+
+        document.getElementById("fisherman-id").value = item.id;
+        document.getElementById("input-nome").value = item.nome;
+        document.getElementById("input-cpf").value = item.cpf;
+        document.getElementById("input-rgp").value = item.rgp || "";
+        document.getElementById("input-telefone").value = item.telefone || "";
+        document.getElementById("input-comunidade").value =
+          item.comunidade || "";
+        document.getElementById("input-ano-renovacao").value =
+          item.anoRenovacao;
+        document.getElementById("input-data-renovacao").value =
+          item.dataRenovacao || "";
+        document.getElementById("input-status-defeso").value =
+          item.statusDefeso;
+        document.getElementById("input-protocolo-defeso").value =
+          item.protocoloDefeso || "";
+        document.getElementById("input-observacoes").value =
+          item.observacoes || "";
+
+        document.getElementById("form-title").innerText =
+          "Editar Cadastro do Pescador";
+        document.getElementById("btn-save-text").innerText =
+          "Atualizar Cadastro";
+        document.getElementById("btn-cancel-edit").classList.remove("hidden");
+
+        switchTab("register");
+      }
+
+      function cancelEdit() {
+        resetForm();
+        switchTab("search");
+      }
+
+      function resetForm() {
+        document.getElementById("fisherman-form").reset();
+        document.getElementById("fisherman-id").value = "";
+        document.getElementById("form-title").innerText =
+          "Cadastrar Novo Pescador";
+        document.getElementById("btn-save-text").innerText = "Salvar Cadastro";
+        document.getElementById("btn-cancel-edit").classList.add("hidden");
+      }
+
+      function deleteFisherman(id) {
+        fishermen = fishermen.filter((f) => f.id !== id);
+        saveToLocalStorage();
+        showToast("Pescador removido.");
+      }
+
+      // TABELA DE RELATÓRIO
+      function renderReport() {
+        const tbody = document.getElementById("report-table-body");
+        tbody.innerHTML = "";
+
+        let regularCount = 0;
+        let vencidoCount = 0;
+        let defesoCount = 0;
+
+        fishermen.forEach((item) => {
+          const isRegular = parseInt(item.anoRenovacao) >= CURRENT_YEAR;
+          if (isRegular) regularCount++;
+          else vencidoCount++;
+          if (item.statusDefeso === "Em Dia / Requerido") defesoCount++;
+
+          const tr = document.createElement("tr");
+          tr.className =
+            "hover:bg-slate-50 transition border-b border-slate-100";
+          tr.innerHTML = `
+                    <td class="p-3.5 font-semibold text-slate-800">${item.nome}</td>
+                    <td class="p-3.5 font-mono text-slate-600">${item.cpf}</td>
+                    <td class="p-3.5 font-mono text-slate-500">${item.rgp || "-"}</td>
+                    <td class="p-3.5">
+                        ${
+                          isRegular
+                            ? `<span class="badge-regular px-2 py-0.5 rounded text-xs font-semibold">${item.anoRenovacao} (Em dia)</span>`
+                            : `<span class="badge-vencido px-2 py-0.5 rounded text-xs font-semibold">${item.anoRenovacao} (Vencida)</span>`
+                        }
+                    </td>
+                    <td class="p-3.5">
+                        <span class="text-xs font-medium text-slate-700">${item.statusDefeso}</span>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <button onclick="openModal('${item.id}')" class="text-cyan-700 hover:text-cyan-900 p-1.5 rounded hover:bg-cyan-50">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        // Métricas
+        document.getElementById("stat-total").innerText = fishermen.length;
+        document.getElementById("stat-regular").innerText = regularCount;
+        document.getElementById("stat-vencido").innerText = vencidoCount;
+        document.getElementById("stat-defeso").innerText = defesoCount;
+      }
+
+      // MÁSCARAS DE ENTRADA
+      function formatCPFInput(input) {
+        let v = input.value.replace(/\D/g, "");
+        if (v.length > 11) v = v.substring(0, 11);
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2");
+        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        input.value = v;
+      }
+
+      function formatPhoneInput(input) {
+        let v = input.value.replace(/\D/g, "");
+        if (v.length > 11) v = v.substring(0, 11);
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+        input.value = v;
+      }
+
+      function formatDateBR(dateStr) {
+        if (!dateStr) return "";
+        const parts = dateStr.split("-");
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        return dateStr;
+      }
+
+      // BACKUP E EXPORTAÇÃO
+      function exportData() {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(fishermen, null, 2));
+        const dlAnchor = document.createElement("a");
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute(
+          "download",
+          `backup_associacao_pesca_${new Date().toISOString().split("T")[0]}.json`,
+        );
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast("Arquivo de backup baixado!");
+      }
+
+      function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+              fishermen = imported;
+              saveToLocalStorage();
+              showToast("Dados importados com sucesso!");
+            } else {
+              alert("Arquivo de backup inválido.");
+            }
+          } catch (err) {
+            alert("Erro ao ler arquivo de backup.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // TOAST NOTIFICATION
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toast-message").innerText = message;
+        toast.classList.remove(
+          "opacity-0",
+          "translate-y-20",
+          "pointer-events-none",
+        );
+
+        setTimeout(() => {
+          toast.classList.add(
+            "opacity-0",
+            "translate-y-20",
+            "pointer-events-none",
+          );
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
+```
